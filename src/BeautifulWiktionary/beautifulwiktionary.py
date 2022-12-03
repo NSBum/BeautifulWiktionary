@@ -9,7 +9,7 @@ import copy
 import re
 import sys
 from typing import Optional
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, element
 
 def lazy_property(fn):
     '''Decorator that makes a property lazy-evaluated.
@@ -49,6 +49,25 @@ class BeautifulWiktionary(BeautifulObject):
     def __init__(self, language: str, word: str):
         self.language = language.lower()
         self.word = word
+        
+    def check_excluded_ids(self, span_id: str) -> bool:
+        excluded = ['Pronunciation', 'Alternative_forms', 'Etymology']
+        for ex in excluded:
+            if re.search(ex, span_id, re.IGNORECASE):
+                return True
+        return False
+    
+    def remove_dl_ul(self, li: element.Tag) -> element.Tag:
+        try:
+            dl_extract = li.dl.extract()
+        except AttributeError:
+            pass
+            # sometimes citations are presented in <ul> so remove
+        try:
+            ul_extract = li.ul.extract()
+        except AttributeError:
+            pass
+        return li
         
     def url(self) -> str:
         raw_word = self.word.replace(" ", "_")
@@ -144,11 +163,89 @@ class BeautifulWiktionary(BeautifulObject):
         m = re.sub(r'\(.*\)', "", word)
         return m.strip()
     
+    @lazy_property
     def headword(self) -> Optional[str]:
         if self.language == 'english':
             return self._en_wiki_ru_headword()
         elif self.language == 'russian':
             return self._ru_wiki_ru_headword()
+        else:
+            return None
+        
+    @lazy_property
+    def definition(self) -> Optional[str]:
+        if self.language == 'russian':
+            found = False
+            definitions = ""
+            for h4 in self.soup.find_all('h4'):
+                for span in h4.children:
+                    try:
+                        if 'Значение' in span['id']:
+                            # this h4's next sibling is a an <ol> block that we need
+                            for h4_sib in h4.next_siblings:
+                                if h4_sib.name == "ol":
+                                    contents = "".join(h4_sib.strings)
+                                    if contents[-1] != '\n':
+                                        contents += '\n'
+                                    # some definitions include this reference which
+                                    # should be eliminated
+                                    contents = contents.replace('[Даль]', '')
+                                    definitions += contents
+                                    break;
+                    except:
+                        pass
+                found = False
+            formatted_definitions = ""
+            for line in definitions.split('\n'):
+                # remove any stress diacritical marks
+                # e.g. in def of продолговатый
+                line = re.sub(r'\u0301', "", line)
+                m = re.search(r'[\w\d\s\.,-\\(\\)—]+', line, re.M)
+                try:
+                    formatted_definitions += f'; {m[0]}'.strip()
+                except:
+                    pass
+            result = re.sub(r"^;\s(.*)$", r"\1", formatted_definitions)
+            return result
+        elif self.language == 'english':
+            definitions = []
+            
+            # there are cases (as with the word 'бухта' where there are
+            # multiple etymologies. In these cases, the page structure is
+            # different. We will try both structures.
+            
+            for tag in ['h3', 'h4']:
+                for h3_or_h4 in self.soup.find_all(tag):
+                    found = False
+                    for h3_or_h4_child in h3_or_h4.children:
+                        if h3_or_h4_child.name == 'span':
+                            if h3_or_h4_child.get('class'):
+                                span_classes = h3_or_h4_child.get('class')
+                                if 'mw-headline' in span_classes:
+                                    span_id = h3_or_h4_child.get('id')
+                                    # exclude any h3 whose span is not a part of speech
+                                    if not self.check_excluded_ids(span_id):
+                                        found = True
+                                    break
+                    if found:
+                        ol = h3_or_h4.find_next_sibling('ol')
+                        if ol is None:
+                            continue
+                        lis = ol.children
+                        for li in lis:
+                            # skip '\n' children
+                            if li.name != 'li':
+                                continue
+                            # remove any extraneous detail tags + children, etc.
+                            li = self.remove_dl_ul(li)
+                            li_def = li.text.strip()
+                            definitions.append(li_def)
+            definition_list = '; '.join(definitions)
+            # if a definition has a single line, remove the ;\s
+            definition_list = re.sub(r'^(?:;\s)+(.*)$', '\\1', definition_list)
+            # remove "see also" links
+            definition_list = re.sub(r'\(see also[^\)]*\)+', "", definition_list)
+            return definition_list
         else:
             return None
         
@@ -277,6 +374,13 @@ class BeautifulWiktionaryIndex(BeautifulObject):
     def prev_word(self) -> Optional[dict]:
         return self._nav_word('prev')
     
+b = BeautifulWiktionary('russian', 'лампа')
+print(b.definition)
+# prints настольный осветительный прибор; то же, что электрическая лампа; разг. то же, что радиолампа
+
+b = BeautifulWiktionary('english', 'лампа')
+print(b.definition)
+# prints lamp; torch; (electronics) vacuum tube (British: valve)
     
 #bi = BeautifulWiktionaryIndex('english', 'автобус')
 #print(bi.next_word)
