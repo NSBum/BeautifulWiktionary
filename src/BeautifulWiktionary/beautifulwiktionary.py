@@ -385,17 +385,3 @@ class BeautifulWiktionaryIndex(BeautifulObject):
     def prev_word(self) -> Optional[dict]:
         return self._nav_word('prev')
     
-#b = BeautifulWiktionary('russian', 'лампа')
-#print(b.definition)
-# prints настольный осветительный прибор; то же, что электрическая лампа; разг. то же, что радиолампа
-
-b = BeautifulWiktionary('english', 'лампа')
-print(b.ipa)
-# prints [ˈɫampə]
-# prints lamp; torch; (electronics) vacuum tube (British: valve)
-    
-#bi = BeautifulWiktionaryIndex('english', 'автобус')
-#print(bi.next_word)
-#
-#
-## https://en.wiktionary.org/w/index.php?title=Category:Russian_lemmas&pagefrom=АДАПТИРОВАТЬ%0Aадаптировать#mw-pages
