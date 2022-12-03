@@ -30,6 +30,16 @@ print(b.headword)
 # prints вы́ебать
 ```
 
+### IPA
+
+The IPA pronunciation can be returned. This feature works with either English or Russian `BeautifulWiktionary` objects.
+
+```python
+b = BeautifulWiktionary('english', 'лампа')
+print(b.ipa)
+# prints [ˈɫampə]
+```
+
 ### Definitions
 
 The `BeautifulWiktionary` class can return the definitions for the word. If the object is instantiated with `english` as the language, the returned definition will be in English. If is is instantiated with `russian` as the language, the definitions will be returned in Russian. All senses of the word are included.
