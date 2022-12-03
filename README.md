@@ -6,7 +6,7 @@ Provides an simplified approach to using BeautifulSoup to scrape Wiktionary for 
 
 To load a standard Wiktionary entry page:
 
-```
+```python
 from BeautifulWiktionary.beautifulwiktionary import *
 
 bw = BeautifulWiktionary('english', 'кот')
