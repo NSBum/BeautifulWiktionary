@@ -17,6 +17,11 @@ from BeautifulWiktionary.beautifulwiktionary import *
 
 bw = BeautifulWiktionary('english', 'кот')
 print(bw.soup())
+
+# headword with syllabic stress marks
+b = BeautifulWiktionary('russian', 'выебать')
+print(b.headword)
+# prints вы́ебать
 ```
 
 To load an index page:
