@@ -173,6 +173,17 @@ class BeautifulWiktionary(BeautifulObject):
             return None
         
     @lazy_property
+    def ipa(self) -> Optional[str]:
+        ipa_el = self.soup.select_one('.IPA')
+        if self.language == 'english':
+            return ipa_el.text
+        elif self.language == 'russian':
+            return f'[{ipa_el.text}]'
+        else:
+            return None
+        
+        
+    @lazy_property
     def definition(self) -> Optional[str]:
         if self.language == 'russian':
             found = False
@@ -374,12 +385,13 @@ class BeautifulWiktionaryIndex(BeautifulObject):
     def prev_word(self) -> Optional[dict]:
         return self._nav_word('prev')
     
-b = BeautifulWiktionary('russian', 'лампа')
-print(b.definition)
+#b = BeautifulWiktionary('russian', 'лампа')
+#print(b.definition)
 # prints настольный осветительный прибор; то же, что электрическая лампа; разг. то же, что радиолампа
 
 b = BeautifulWiktionary('english', 'лампа')
-print(b.definition)
+print(b.ipa)
+# prints [ˈɫampə]
 # prints lamp; torch; (electronics) vacuum tube (British: valve)
     
 #bi = BeautifulWiktionaryIndex('english', 'автобус')
