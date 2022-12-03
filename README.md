@@ -15,7 +15,7 @@ print(bw.soup())
 
 To load an index page:
 
-```
+```python
 from BeautifulWiktionary.beautifulwiktionary import *
 
 bi = BeautifulWiktionaryIndex('english', 'автобус')
