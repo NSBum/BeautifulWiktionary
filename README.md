@@ -2,6 +2,12 @@
 
 Provides an simplified approach to using BeautifulSoup to scrape Wiktionary for useful information. Currently it is restricted to the English and Russian versions of Wiktionary and to the Russian language within both. But that may be expanded over time.
 
+## Installation
+
+```bash
+pip install -i https://test.pypi.org/simple/ BeautifulWiktionary==0.0.3
+```
+
 ## Usage
 
 To load a standard Wiktionary entry page:
