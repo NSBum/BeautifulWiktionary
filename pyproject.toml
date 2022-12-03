@@ -1,6 +1,6 @@
 [project]
 name = "BeautifulWiktionary"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
    { name="Alan Duncan", email="duncan.alan@me.com" }
 ]
@@ -16,3 +16,6 @@ classifiers = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+[project.urls]
+"Homepage" = "https://github.com/NSBum/BeautifulWiktionary"
+"Bug Tracker" = "https://github.com/NSBum/BeautifulWiktionary/issues"
